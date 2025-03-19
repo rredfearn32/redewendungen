@@ -1,7 +1,5 @@
 /**
  * TOOD:
- * - BUGFIX where duplicate options can be chosen
- * - Highlight selected option
  * - Style in general
  */
 
