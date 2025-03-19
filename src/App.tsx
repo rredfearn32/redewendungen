@@ -1,22 +1,9 @@
-/**
- * TOOD:
- * - Style in general
- */
-
-import { useEffect, useState } from 'react'
+import {useEffect, useState} from 'react'
 import * as data from './assets/idioms.json'
-
-interface Idiom {
-  phrase: string;
-  meaning: string;
-  explanation: string;
-}
-
-enum AnsweredState {
-  UNANSWERED,
-  CORRECT,
-  WRONG
-}
+import {Answer} from "./components/Answer.tsx";
+import Idiom from "./types/Idiom.ts";
+import AnsweredState from "./types/AnsweredState.ts";
+import {Result} from "./components/Result.tsx";
 
 const GermanIdioms = data.idioms as unknown as Idiom[];
 
@@ -32,21 +19,11 @@ const getThreeRandomUniqueIdioms = () => Array.from({length: 3}).reduce((acc: Id
 
 const calcIsCorrect = (clickedIdiom: Idiom, targetIdiom: Idiom) => clickedIdiom.meaning === targetIdiom.meaning;
 
-const calcIconToShow = (answerState: AnsweredState, clickedIdiom: Idiom, targetIdiom: Idiom) => {
-  if(answerState === AnsweredState.UNANSWERED) return;
-
-  if(calcIsCorrect(clickedIdiom, targetIdiom)) {
-    return '✅'
-  } else {
-    return '❌'
-  }
-}
-
 function App() {
   const [threeRandomIdioms, setThreeRandomIdioms] = useState<Idiom[]>([]);
   const [targetIdiomIndex, setTargetIdiomIndex] = useState<number>(-1);
   const [selectedIdiomIndex, setSelectedIdiomIndex] = useState<number>(-1);
-  const [answerState, setAnswerState] = useState<AnsweredState>(AnsweredState.UNANSWERED);
+  const [answeredState, setAnsweredState] = useState<AnsweredState>(AnsweredState.UNANSWERED);
   const [counter, setCounter] = useState(0)
 
   const targetIdiom = threeRandomIdioms[targetIdiomIndex];
@@ -56,20 +33,20 @@ function App() {
   const reset = () => {
     setThreeRandomIdioms(getThreeRandomUniqueIdioms());
     setTargetIdiomIndex(Math.floor(Math.random() * 3));
-    setAnswerState(AnsweredState.UNANSWERED);
+    setAnsweredState(AnsweredState.UNANSWERED);
     setSelectedIdiomIndex(-1)
   };
 
   const onOptionClick = (option: Idiom, targetIndex: number) => {
-    if(answerState !== AnsweredState.UNANSWERED) return;
+    if(answeredState !== AnsweredState.UNANSWERED) return;
 
     setSelectedIdiomIndex(targetIndex)
 
     if (calcIsCorrect(option, targetIdiom)) {
-      setAnswerState(AnsweredState.CORRECT)
+      setAnsweredState(AnsweredState.CORRECT)
       setCounter((current) => current + 1)
     } else {
-      setAnswerState(AnsweredState.WRONG);
+      setAnsweredState(AnsweredState.WRONG);
       setCounter(0)
     }
   }
@@ -79,33 +56,23 @@ function App() {
     setTargetIdiomIndex(Math.floor(Math.random() * 3))
   }, [])
 
-  return (
-    <>
-      {isReady && 
-        <div>
-          <p>
-            {targetIdiom?.phrase}
-          </p>
-          {answerState !== AnsweredState.UNANSWERED && <div>{targetIdiom.explanation}</div>}
-          <ul>
-            {threeRandomIdioms.map((idiom, index) => (
-                <li key={idiom.meaning}>
-                  <button onClick={() => onOptionClick(idiom, index)} disabled={answerState !== AnsweredState.UNANSWERED} className={`${index === selectedIdiomIndex ? " text-red" : ""}`}>
-                    {calcIconToShow(answerState, idiom, targetIdiom)}{idiom.meaning}
-                  </button>
-                </li>
-            ))}
-          </ul>
-          <div>Correct: {counter}</div>
-          {answerState !== AnsweredState.UNANSWERED && <>
-          {answerState === AnsweredState.CORRECT ? (
-            <div>
-              <p>Correct</p>
-            </div>
-          ) : <div>Wrong</div>}<button onClick={reset}>Next</button></>}
-        </div>
-      }
-    </>
+  return (isReady &&
+    <div className={'flex flex-col items-center justify-center min-h-screen space-y-3 px-2'}>
+      <h1 className={'text-xl font-black text-gray-700'}>Was bedeutet dass denn?</h1>
+      <p className={'bg-white p-2 italic'}>
+        "{targetIdiom?.phrase}"
+      </p>
+      <ul className={'space-y-2 flex flex-col sm:flex-row sm:space-x-2'}>
+        {threeRandomIdioms.map((idiom, index) => (
+            <li key={idiom.meaning}>
+              <Answer text={idiom.meaning} onClick={() => onOptionClick(idiom, index)} isDisabled={answeredState !== AnsweredState.UNANSWERED} isSelected={index === selectedIdiomIndex} isCorrectAnswer={index === targetIdiomIndex} answeredState={answeredState} />
+            </li>
+        ))}
+      </ul>
+      {answeredState !== AnsweredState.UNANSWERED && <div className={'bg-white text-gray-500 p-3 max-w-md text-center'}>{targetIdiom.explanation}</div>}
+      <Result onReset={reset} answeredState={answeredState} />
+      <div className={'absolute bottom-10 p-2'}>Correct: {counter}</div>
+    </div>
   )
 }
 
