@@ -86,7 +86,13 @@ function App() {
           </p>
           {answerState !== AnsweredState.UNANSWERED && <div>{targetIdiom.explanation}</div>}
           <ul>
-            {threeRandomIdioms.map((idiom) => <li key={idiom.meaning}><button onClick={() => onOptionClick(idiom)}>{calcIconToShow(answerState, idiom, targetIdiom)}{idiom.meaning}</button></li>)}
+            {threeRandomIdioms.map((idiom) => (
+                <li key={idiom.meaning}>
+                  <button onClick={() => onOptionClick(idiom)}>
+                    {calcIconToShow(answerState, idiom, targetIdiom)}{idiom.meaning}
+                  </button>
+                </li>
+            ))}
           </ul>
           <div>Correct: {counter}</div>
           {answerState !== AnsweredState.UNANSWERED && <>
