@@ -47,6 +47,7 @@ const calcIconToShow = (answerState: AnsweredState, clickedIdiom: Idiom, targetI
 function App() {
   const [threeRandomIdioms, setThreeRandomIdioms] = useState<Idiom[]>([]);
   const [targetIdiomIndex, setTargetIdiomIndex] = useState<number>(-1);
+  const [selectedIdiomIndex, setSelectedIdiomIndex] = useState<number>(-1);
   const [answerState, setAnswerState] = useState<AnsweredState>(AnsweredState.UNANSWERED);
   const [counter, setCounter] = useState(0)
 
@@ -58,10 +59,13 @@ function App() {
     setThreeRandomIdioms(getThreeRandomUniqueIdioms());
     setTargetIdiomIndex(Math.floor(Math.random() * 3));
     setAnswerState(AnsweredState.UNANSWERED);
+    setSelectedIdiomIndex(-1)
   };
 
-  const onOptionClick = (option: Idiom) => {
+  const onOptionClick = (option: Idiom, targetIndex: number) => {
     if(answerState !== AnsweredState.UNANSWERED) return;
+
+    setSelectedIdiomIndex(targetIndex)
 
     if (calcIsCorrect(option, targetIdiom)) {
       setAnswerState(AnsweredState.CORRECT)
@@ -86,9 +90,9 @@ function App() {
           </p>
           {answerState !== AnsweredState.UNANSWERED && <div>{targetIdiom.explanation}</div>}
           <ul>
-            {threeRandomIdioms.map((idiom) => (
+            {threeRandomIdioms.map((idiom, index) => (
                 <li key={idiom.meaning}>
-                  <button onClick={() => onOptionClick(idiom)}>
+                  <button onClick={() => onOptionClick(idiom, index)} disabled={answerState !== AnsweredState.UNANSWERED} className={`${index === selectedIdiomIndex ? " text-red" : ""}`}>
                     {calcIconToShow(answerState, idiom, targetIdiom)}{idiom.meaning}
                   </button>
                 </li>
