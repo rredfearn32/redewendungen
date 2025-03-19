@@ -1,3 +1,10 @@
+/**
+ * TOOD:
+ * - BUGFIX where duplicate options can be chosen
+ * - Highlight selected option
+ * - Style in general
+ */
+
 import { useEffect, useState } from 'react'
 import * as data from './assets/idioms.json'
 
@@ -16,7 +23,14 @@ enum AnsweredState {
 const GermanIdioms = data.idioms as unknown as Idiom[];
 
 const getRandomIdiom = (): Idiom => GermanIdioms[Math.floor(Math.random() * GermanIdioms.length)];
-const getIdioms = (): Idiom[] => Array.from({length: 3}).map(getRandomIdiom);
+const getThreeRandomUniqueIdioms = () => Array.from({length: 3}).reduce((acc: Idiom[]) => {
+  let randomIdiom = getRandomIdiom();
+  while (acc.includes(randomIdiom)) {
+    randomIdiom = getRandomIdiom();
+  }
+  acc.push(randomIdiom);
+  return acc;
+}, []);
 
 const calcIsCorrect = (clickedIdiom: Idiom, targetIdiom: Idiom) => clickedIdiom.meaning === targetIdiom.meaning;
 
@@ -41,7 +55,7 @@ function App() {
   const isReady = targetIdiomIndex !== -1;
 
   const reset = () => {
-    setThreeRandomIdioms(getIdioms());
+    setThreeRandomIdioms(getThreeRandomUniqueIdioms());
     setTargetIdiomIndex(Math.floor(Math.random() * 3));
     setAnswerState(AnsweredState.UNANSWERED);
   };
@@ -59,7 +73,7 @@ function App() {
   }
   
   useEffect(() => {
-    setThreeRandomIdioms(getIdioms());
+    setThreeRandomIdioms(getThreeRandomUniqueIdioms());
     setTargetIdiomIndex(Math.floor(Math.random() * 3))
   }, [])
 
